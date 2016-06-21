@@ -8,5 +8,5 @@
 
 import UIKit
 
-class EndlessPageCell : UIView {
+public class EndlessPageCell : UIView {
 }

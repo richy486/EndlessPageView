@@ -8,44 +8,44 @@
 
 import UIKit
 
-struct IndexLocation : Hashable {
-    var column:Int
-    var row:Int
+public struct IndexLocation : Hashable {
+    public var column:Int
+    public var row:Int
     
-    var hashValue: Int {
+    public var hashValue: Int {
         return column.hashValue | (row.hashValue << 32)
     }
     
-    init(column: Int, row: Int) {
+    public init(column: Int, row: Int) {
         self.column = column
         self.row = row
     }
 }
-func == (lhs: IndexLocation, rhs: IndexLocation) -> Bool {
+public func == (lhs: IndexLocation, rhs: IndexLocation) -> Bool {
     return lhs.column == rhs.column && lhs.row == rhs.row
 }
 
-protocol EndlessPageViewDataSource : class {
+public protocol EndlessPageViewDataSource : class {
     func endlessPageView(endlessPageView:EndlessPageView, cellForIndexLocation indexLocation: IndexLocation) -> EndlessPageCell
 }
 
-protocol EndlessPageViewDelegate : class {
+public protocol EndlessPageViewDelegate : class {
     func endlessPageViewDidSelectItemAtIndex(index: Int)
     func endlessPageViewDidScroll(loopScrollView: EndlessPageView)
 }
 
 
-enum EndlessPageScrollDirection {
+public enum EndlessPageScrollDirection {
     case Horizontal
     case Vertical
     case Both
 }
 
-class EndlessPageView : UIView, UIGestureRecognizerDelegate {
+public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     
     // Protocols
-    weak var dataSource:EndlessPageViewDataSource?
-    weak var delegate:EndlessPageViewDelegate?
+    public weak var dataSource:EndlessPageViewDataSource?
+    public weak var delegate:EndlessPageViewDelegate?
     
     // Offset position
     private(set) var contentOffset = CGPoint.zero
@@ -58,7 +58,7 @@ class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     // Data cache
     private var visibleCells = [IndexLocation: EndlessPageCell]()
     
-    var scrollDirection = EndlessPageScrollDirection.Both
+    public var scrollDirection = EndlessPageScrollDirection.Both
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -70,7 +70,7 @@ class EndlessPageView : UIView, UIGestureRecognizerDelegate {
         self.init(frame:CGRect.zero)
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setup()
     }
@@ -80,6 +80,12 @@ class EndlessPageView : UIView, UIGestureRecognizerDelegate {
         panGestureRecognizer.delegate = self
         addGestureRecognizer(panGestureRecognizer)
         
+    }
+    
+    override public func layoutSubviews() {
+        super.layoutSubviews()
+        
+        reloadData()
     }
     
     
@@ -122,19 +128,19 @@ class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     
     // MARK: Data cache
     
-    func reloadData() {
+    public func reloadData() {
         updateCells()
     }
     
-    func registerClass(cellClass: EndlessPageCell.Type?, forViewWithReuseIdentifier identifier: String) {
+    public func registerClass(cellClass: EndlessPageCell.Type?, forViewWithReuseIdentifier identifier: String) {
         
         registeredCellClasses[identifier] = cellClass
     }
-    func registerNib(nib: UINib?, forViewWithReuseIdentifier identifier: String) {
+    public func registerNib(nib: UINib?, forViewWithReuseIdentifier identifier: String) {
         fatalError("registerNib(nib:forViewWithReuseIdentifier:) has not been implemented")
     }
     
-    func dequeueReusableCellWithReuseIdentifier(identifier: String) -> EndlessPageCell {
+    public func dequeueReusableCellWithReuseIdentifier(identifier: String) -> EndlessPageCell {
         if cellPool[identifier] == nil {
             cellPool[identifier] = [EndlessPageCell]()
         }
@@ -163,44 +169,47 @@ class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     
     private func updateCells() {
         let pageOffset = contentOffset / CGPoint(x: CGRectGetWidth(self.frame), y: CGRectGetHeight(self.frame))
-        let rows = floor(pageOffset.x) == pageOffset.x ? [Int(pageOffset.x)] : [Int(pageOffset.x), Int(pageOffset.x + 1)]
-        let columns = floor(pageOffset.y) == pageOffset.y ? [Int(pageOffset.y)] : [Int(pageOffset.y), Int(pageOffset.y + 1)]
-        var updatedVisibleCellIndexLocations = [IndexLocation]()
         
-        for row in rows {
-            for column in columns {
-                
-                let indexLocation = IndexLocation(column: column, row: row)
-                updatedVisibleCellIndexLocations.append(indexLocation)
-                
-                let cell:EndlessPageCell? = {
-                    if let cell = visibleCells[indexLocation] {
-                        return cell
-                    } else if let cell = dataSource?.endlessPageView(self, cellForIndexLocation: indexLocation) {
-                        visibleCells[indexLocation] = cell
-                        addSubview(cell)
-                        return cell
-                    }
+        if !pageOffset.x.isNaN && !pageOffset.y.isNaN {
+            let rows = floor(pageOffset.x) == pageOffset.x ? [Int(pageOffset.x)] : [Int(pageOffset.x), Int(pageOffset.x + 1)]
+            let columns = floor(pageOffset.y) == pageOffset.y ? [Int(pageOffset.y)] : [Int(pageOffset.y), Int(pageOffset.y + 1)]
+            var updatedVisibleCellIndexLocations = [IndexLocation]()
+            
+            for row in rows {
+                for column in columns {
                     
-                    return nil
-                }()
-                
-                if let cell = cell {
-                    cell.frame = CGRect(x: CGRectGetWidth(self.frame) * CGFloat(row)
-                        , y: CGRectGetHeight(self.frame) * CGFloat(column)
-                        , width: CGRectGetWidth(self.frame)
-                        , height: CGRectGetHeight(self.frame))
+                    let indexLocation = IndexLocation(column: column, row: row)
+                    updatedVisibleCellIndexLocations.append(indexLocation)
+                    
+                    let cell:EndlessPageCell? = {
+                        if let cell = visibleCells[indexLocation] {
+                            return cell
+                        } else if let cell = dataSource?.endlessPageView(self, cellForIndexLocation: indexLocation) {
+                            visibleCells[indexLocation] = cell
+                            addSubview(cell)
+                            return cell
+                        }
+                        
+                        return nil
+                    }()
+                    
+                    if let cell = cell {
+                        cell.frame = CGRect(x: CGRectGetWidth(self.frame) * CGFloat(row)
+                            , y: CGRectGetHeight(self.frame) * CGFloat(column)
+                            , width: CGRectGetWidth(self.frame)
+                            , height: CGRectGetHeight(self.frame))
+                    }
                 }
             }
+            
+            visibleCells = visibleCells.filter({ updatedVisibleCellIndexLocations.contains($0.0) })
         }
-        
-        visibleCells = visibleCells.filter({ updatedVisibleCellIndexLocations.contains($0.0) })
     }
     
     
     // MARK: Gesture delegate
     
-    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    public func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
 }
