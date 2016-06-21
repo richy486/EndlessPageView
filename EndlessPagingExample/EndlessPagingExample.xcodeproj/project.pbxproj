@@ -12,7 +12,26 @@
 		CA3676371D19C5E400B227BF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA3676351D19C5E400B227BF /* Main.storyboard */; };
 		CA3676391D19C5E400B227BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA3676381D19C5E400B227BF /* Assets.xcassets */; };
 		CA36763C1D19C5E400B227BF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA36763A1D19C5E400B227BF /* LaunchScreen.storyboard */; };
+		CA36764B1D19CE6A00B227BF /* EndlessPageView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA3676471D19CE5300B227BF /* EndlessPageView.framework */; };
+		CA36764C1D19CE6A00B227BF /* EndlessPageView.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CA3676471D19CE5300B227BF /* EndlessPageView.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		CA36764F1D19CE8100B227BF /* Interpolate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA36764E1D19CE8100B227BF /* Interpolate.framework */; };
+		CA3676501D19CE8100B227BF /* Interpolate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CA36764E1D19CE8100B227BF /* Interpolate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CA36764D1D19CE6A00B227BF /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				CA3676501D19CE8100B227BF /* Interpolate.framework in Embed Frameworks */,
+				CA36764C1D19CE6A00B227BF /* EndlessPageView.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		CA36762E1D19C5E400B227BF /* EndlessPagingExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EndlessPagingExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -22,6 +41,8 @@
 		CA3676381D19C5E400B227BF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CA36763B1D19C5E400B227BF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		CA36763D1D19C5E400B227BF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CA3676471D19CE5300B227BF /* EndlessPageView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = EndlessPageView.framework; path = "/Users/richardadem/Library/Developer/Xcode/DerivedData/EndlessPagingExample-fkvhrbkuhzsudygyuwiajzkkmtaz/Build/Products/Debug-iphoneos/EndlessPageView.framework"; sourceTree = "<absolute>"; };
+		CA36764E1D19CE8100B227BF /* Interpolate.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = Interpolate.framework; path = "/Users/richardadem/Library/Developer/Xcode/DerivedData/EndlessPagingExample-fkvhrbkuhzsudygyuwiajzkkmtaz/Build/Products/Debug-iphoneos/Interpolate.framework"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +50,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA36764F1D19CE8100B227BF /* Interpolate.framework in Frameworks */,
+				CA36764B1D19CE6A00B227BF /* EndlessPageView.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,6 +61,8 @@
 		CA3676251D19C5E400B227BF = {
 			isa = PBXGroup;
 			children = (
+				CA36764E1D19CE8100B227BF /* Interpolate.framework */,
+				CA3676471D19CE5300B227BF /* EndlessPageView.framework */,
 				CA3676301D19C5E400B227BF /* EndlessPagingExample */,
 				CA36762F1D19C5E400B227BF /* Products */,
 			);
@@ -74,6 +99,7 @@
 				CA36762A1D19C5E400B227BF /* Sources */,
 				CA36762B1D19C5E400B227BF /* Frameworks */,
 				CA36762C1D19C5E400B227BF /* Resources */,
+				CA36764D1D19CE6A00B227BF /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -250,6 +276,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = EndlessPagingExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.EndlessPagingExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -261,6 +288,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = EndlessPagingExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.EndlessPagingExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -286,6 +314,7 @@
 				CA3676421D19C5E400B227BF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

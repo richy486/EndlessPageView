@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CA3676441D19C94700B227BF /* Interpolate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA3676431D19C94700B227BF /* Interpolate.framework */; };
 		CA76C7581D199A9400A33806 /* EndlessPageView.h in Headers */ = {isa = PBXBuildFile; fileRef = CA76C7571D199A9400A33806 /* EndlessPageView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CA76C75F1D199A9400A33806 /* EndlessPageView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA76C7541D199A9400A33806 /* EndlessPageView.framework */; };
 		CA76C7641D199A9400A33806 /* EndlessPageViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA76C7631D199A9400A33806 /* EndlessPageViewTests.swift */; };
@@ -27,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CA3676431D19C94700B227BF /* Interpolate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Interpolate.framework; path = "Carthage/Checkouts/Interpolate/build/Debug-iphoneos/Interpolate.framework"; sourceTree = "<group>"; };
 		CA76C7541D199A9400A33806 /* EndlessPageView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EndlessPageView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA76C7571D199A9400A33806 /* EndlessPageView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EndlessPageView.h; sourceTree = "<group>"; };
 		CA76C7591D199A9400A33806 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -44,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA3676441D19C94700B227BF /* Interpolate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,6 +64,7 @@
 		CA76C74A1D199A9400A33806 = {
 			isa = PBXGroup;
 			children = (
+				CA3676431D19C94700B227BF /* Interpolate.framework */,
 				CA76C7561D199A9400A33806 /* EndlessPageView */,
 				CA76C7621D199A9400A33806 /* EndlessPageViewTests */,
 				CA76C7551D199A9400A33806 /* Products */,
@@ -331,8 +335,13 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Checkouts/Interpolate/build/Debug-iphoneos",
+				);
 				INFOPLIST_FILE = EndlessPageView/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.EndlessPageView;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -349,8 +358,13 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Checkouts/Interpolate/build/Debug-iphoneos",
+				);
 				INFOPLIST_FILE = EndlessPageView/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.EndlessPageView;
 				PRODUCT_NAME = "$(TARGET_NAME)";

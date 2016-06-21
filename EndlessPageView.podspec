@@ -11,4 +11,6 @@ Pod::Spec.new do |spec|
   spec.requires_arc = true
   spec.source = { git: "https://github.com/richy486/EndlessPageView.git", tag: "v#{spec.version}", submodules: true }
   spec.source_files = "EndlessPageView/**/*.{h,swift}"
+
+  spec.dependency "Interpolate", "~> 0.1"
 end

@@ -1,0 +1,3 @@
+[submodule "Carthage/Checkouts/Interpolate"]
+	path = Carthage/Checkouts/Interpolate
+	url = https://github.com/marmelroy/Interpolate.git

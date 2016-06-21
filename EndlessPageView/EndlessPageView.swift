@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Interpolate
 
 public struct IndexLocation : Hashable {
     public var column:Int
@@ -43,9 +44,16 @@ public enum EndlessPageScrollDirection {
 
 public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     
+    // - Public -
+    
     // Protocols
     public weak var dataSource:EndlessPageViewDataSource?
     public weak var delegate:EndlessPageViewDelegate?
+    
+    // Public settings
+    public var scrollDirection = EndlessPageScrollDirection.Both
+    
+    // - Private -
     
     // Offset position
     private(set) var contentOffset = CGPoint.zero
@@ -58,7 +66,10 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     // Data cache
     private var visibleCells = [IndexLocation: EndlessPageCell]()
     
-    public var scrollDirection = EndlessPageScrollDirection.Both
+    // Animation
+    private var offsetChangeAnimation:Interpolate?
+    
+    // MARK: View lifecycle
     
     override public init(frame: CGRect) {
         super.init(frame: frame)
@@ -118,9 +129,55 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
                 }()
             }
             
-            self.bounds = CGRect(origin: contentOffset, size: self.bounds.size)
+            if panGesture.state == UIGestureRecognizerState.Ended {
+                
+                let velocity = panGesture.velocityInView(holder) * -1
+                let magnitude = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2))
+                let slideMult = magnitude / 200
+                
+                let slideFactor = 0.1 * slideMult
+                
+                
+                let finalPoint:CGPoint = {
+                    var point = CGPoint.zero
+                    switch scrollDirection {
+                    case .Horizontal:
+                        point = CGPoint(x: contentOffset.x + (velocity.x * slideFactor), y: contentOffset.y)
+                    case .Vertical:
+                        point = CGPoint(x: contentOffset.x, y: contentOffset.y + (velocity.y * slideFactor))
+                    case .Both:
+                        point = CGPoint(x: contentOffset.x + (velocity.x * slideFactor), y: contentOffset.y + (velocity.y * slideFactor))
+                    }
+                    
+                    return point
+                }()
+                
+                
+                if let offsetChangeAnimation = offsetChangeAnimation {
+                    offsetChangeAnimation.stopAnimation()
+                    offsetChangeAnimation.invalidate()
+                }
+                offsetChangeAnimation = Interpolate(from: contentOffset
+                    , to: finalPoint
+                    , function: BasicInterpolation.EaseOut
+                    , apply: { [weak self] (pos) in
+                        
+                        var position = pos
+                        if position.x.isNaN {
+                            position.x = 0.0
+                        }
+                        if position.y.isNaN {
+                            position.y = 0.0
+                        }
+                        
+                        self?.contentOffset = position
+                        self?.updateBounds()
+                        self?.updateCells()
+                    })
+                offsetChangeAnimation?.animate(duration: slideFactor * 2)
+            }
             
-            
+            updateBounds()
             updateCells()
         }
         
@@ -166,6 +223,10 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     
     
     // MARK: Update cells
+    
+    private func updateBounds() {
+        bounds = CGRect(origin: contentOffset, size: bounds.size)
+    }
     
     private func updateCells() {
         let pageOffset = contentOffset / CGPoint(x: CGRectGetWidth(self.frame), y: CGRectGetHeight(self.frame))

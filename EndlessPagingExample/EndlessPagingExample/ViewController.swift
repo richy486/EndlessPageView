@@ -37,9 +37,9 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
     func endlessPageView(endlessPageView: EndlessPageView, cellForIndexLocation indexLocation: IndexLocation) -> EndlessPageCell {
         
         let cell = endlessPageView.dequeueReusableCellWithReuseIdentifier("cell")
-        cell.backgroundColor = UIColor(hue: 1.0 - (CGFloat(indexLocation.row) / 10)
+        cell.backgroundColor = UIColor(hue: 1.0 - (CGFloat(indexLocation.row) / 10) % 1
             , saturation: 0.75
-            , brightness: 1.0 - (CGFloat(indexLocation.column) / 10)
+            , brightness: 1.0 - (CGFloat(indexLocation.column) / 10) % 1
             , alpha: 1.0)
         
         print("location: \(indexLocation), color: \(cell.backgroundColor)")
