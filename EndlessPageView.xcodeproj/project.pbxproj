@@ -14,7 +14,6 @@
 		CA76C76F1D199F5B00A33806 /* EndlessPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA76C76E1D199F5B00A33806 /* EndlessPageView.swift */; };
 		CA76C7711D19A02100A33806 /* EndlessPageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA76C7701D19A02100A33806 /* EndlessPageCell.swift */; };
 		CA76C7731D19A05600A33806 /* CGHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA76C7721D19A05600A33806 /* CGHelpers.swift */; };
-		CA76C7751D19A0D000A33806 /* DictionaryMapFilterReduce.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA76C7741D19A0D000A33806 /* DictionaryMapFilterReduce.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +37,6 @@
 		CA76C76E1D199F5B00A33806 /* EndlessPageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EndlessPageView.swift; sourceTree = "<group>"; };
 		CA76C7701D19A02100A33806 /* EndlessPageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EndlessPageCell.swift; sourceTree = "<group>"; };
 		CA76C7721D19A05600A33806 /* CGHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGHelpers.swift; sourceTree = "<group>"; };
-		CA76C7741D19A0D000A33806 /* DictionaryMapFilterReduce.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryMapFilterReduce.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,7 +85,6 @@
 				CA76C76E1D199F5B00A33806 /* EndlessPageView.swift */,
 				CA76C7701D19A02100A33806 /* EndlessPageCell.swift */,
 				CA76C7721D19A05600A33806 /* CGHelpers.swift */,
-				CA76C7741D19A0D000A33806 /* DictionaryMapFilterReduce.swift */,
 				CA76C7591D199A9400A33806 /* Info.plist */,
 			);
 			path = EndlessPageView;
@@ -212,7 +209,6 @@
 			files = (
 				CA76C7731D19A05600A33806 /* CGHelpers.swift in Sources */,
 				CA76C76F1D199F5B00A33806 /* EndlessPageView.swift in Sources */,
-				CA76C7751D19A0D000A33806 /* DictionaryMapFilterReduce.swift in Sources */,
 				CA76C7711D19A02100A33806 /* EndlessPageCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

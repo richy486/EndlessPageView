@@ -33,16 +33,23 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
         
     }
     
+    override func motionEnded(motion: UIEventSubtype, withEvent event: UIEvent?) {
+        if motion == .MotionShake {
+            print("shake")
+            endlessPageView.reloadData()
+        }
+    }
+    
     // MARK: Endless page view datasource
     func endlessPageView(endlessPageView: EndlessPageView, cellForIndexLocation indexLocation: IndexLocation) -> EndlessPageCell {
         
         let cell = endlessPageView.dequeueReusableCellWithReuseIdentifier("cell")
-        cell.backgroundColor = UIColor(hue: 1.0 - (CGFloat(indexLocation.row) / 10) % 1
+        cell.backgroundColor = UIColor(hue: CGFloat(1.0 - fabs(Float(indexLocation.row) / 10) % 1)
             , saturation: 0.75
-            , brightness: 1.0 - (CGFloat(indexLocation.column) / 10) % 1
+            , brightness: CGFloat(1.0 - fabs(Float(indexLocation.column) / 10) % 1)
             , alpha: 1.0)
         
-        print("location: \(indexLocation), color: \(cell.backgroundColor)")
+//        print("location: \(indexLocation), color: \(cell.backgroundColor)")
         
         return cell
     }
@@ -50,7 +57,9 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
     // MARK: Endless page view delegate
     func endlessPageViewDidSelectItemAtIndex(index: Int) {
     }
-    func endlessPageViewDidScroll(loopScrollView: EndlessPageView) {
+    func endlessPageViewDidScroll(endlessPageView: EndlessPageView) {
+        
+//        print(String(format: "%.02f, %.02f", endlessPageView.contentOffset.x, endlessPageView.contentOffset.y))
     }
     
     override func didReceiveMemoryWarning() {

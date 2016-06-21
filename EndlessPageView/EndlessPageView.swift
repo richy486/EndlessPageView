@@ -32,7 +32,7 @@ public protocol EndlessPageViewDataSource : class {
 
 public protocol EndlessPageViewDelegate : class {
     func endlessPageViewDidSelectItemAtIndex(index: Int)
-    func endlessPageViewDidScroll(loopScrollView: EndlessPageView)
+    func endlessPageViewDidScroll(endlessPageView: EndlessPageView)
 }
 
 
@@ -56,7 +56,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     // - Private -
     
     // Offset position
-    private(set) var contentOffset = CGPoint.zero
+    private(set) public var contentOffset = CGPoint.zero
     private var panStartContentOffset = CGPoint.zero
     
     // Cell pool
@@ -68,6 +68,8 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     
     // Animation
     private var offsetChangeAnimation:Interpolate?
+    
+    private var hasDoneFirstReload = false
     
     // MARK: View lifecycle
     
@@ -96,7 +98,10 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     override public func layoutSubviews() {
         super.layoutSubviews()
         
-        reloadData()
+        if !hasDoneFirstReload {
+            hasDoneFirstReload = true
+            reloadData()
+        }
     }
     
     
@@ -186,6 +191,8 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     // MARK: Data cache
     
     public func reloadData() {
+        contentOffset = CGPoint.zero
+        updateBounds()
         updateCells()
     }
     
@@ -215,6 +222,8 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
             let cell = cellClass.init()
             cellPool[identifier]?.append(cell)
             
+            print("generated cell for identifer: \(identifier), pool size: ", cellPool[identifier]?.count)
+            
             return cell
         }
         
@@ -225,15 +234,29 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     // MARK: Update cells
     
     private func updateBounds() {
+        
         bounds = CGRect(origin: contentOffset, size: bounds.size)
+        delegate?.endlessPageViewDidScroll(self)
     }
     
     private func updateCells() {
         let pageOffset = contentOffset / CGPoint(x: CGRectGetWidth(self.frame), y: CGRectGetHeight(self.frame))
         
         if !pageOffset.x.isNaN && !pageOffset.y.isNaN {
-            let rows = floor(pageOffset.x) == pageOffset.x ? [Int(pageOffset.x)] : [Int(pageOffset.x), Int(pageOffset.x + 1)]
-            let columns = floor(pageOffset.y) == pageOffset.y ? [Int(pageOffset.y)] : [Int(pageOffset.y), Int(pageOffset.y + 1)]
+            let rows:[Int] = {
+                if pageOffset.y >= 0 {
+                    return floor(pageOffset.y) == pageOffset.y ? [Int(pageOffset.y)] : [Int(pageOffset.y), Int(pageOffset.y + 1)]
+                }
+                return floor(pageOffset.y) == pageOffset.y ? [Int(pageOffset.y)] : [Int(pageOffset.y), Int(pageOffset.y - 1)]
+            }()
+            
+            let columns:[Int] = {
+                if pageOffset.x >= 0 {
+                    return floor(pageOffset.x) == pageOffset.x ? [Int(pageOffset.x)] : [Int(pageOffset.x), Int(pageOffset.x + 1)]
+                }
+                return floor(pageOffset.x) == pageOffset.x ? [Int(pageOffset.x)] : [Int(pageOffset.x), Int(pageOffset.x - 1)]
+            }()
+            
             var updatedVisibleCellIndexLocations = [IndexLocation]()
             
             for row in rows {
@@ -255,15 +278,27 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
                     }()
                     
                     if let cell = cell {
-                        cell.frame = CGRect(x: CGRectGetWidth(self.frame) * CGFloat(row)
-                            , y: CGRectGetHeight(self.frame) * CGFloat(column)
+                        cell.frame = CGRect(x: CGRectGetWidth(self.frame) * CGFloat(column)
+                            , y: CGRectGetHeight(self.frame) * CGFloat(row)
                             , width: CGRectGetWidth(self.frame)
                             , height: CGRectGetHeight(self.frame))
                     }
                 }
             }
             
-            visibleCells = visibleCells.filter({ updatedVisibleCellIndexLocations.contains($0.0) })
+            let oldCount = visibleCells.count
+            
+            let previousKeys = visibleCells.keys
+            let removedKeys = previousKeys.filter( { !updatedVisibleCellIndexLocations.contains($0) } )
+            
+            removedKeys.forEach({ (indexLocation) in
+                visibleCells[indexLocation]?.removeFromSuperview()
+                visibleCells[indexLocation] = nil
+            })
+            
+            if oldCount != visibleCells.count {
+                print("removed \(oldCount - visibleCells.count) cells")
+            }
         }
     }
     
