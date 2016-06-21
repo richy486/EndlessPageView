@@ -60,13 +60,13 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     
     public var scrollDirection = EndlessPageScrollDirection.Both
     
-    override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         
         setup()
     }
     
-    convenience init () {
+    convenience public init () {
         self.init(frame:CGRect.zero)
     }
     
