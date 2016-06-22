@@ -199,8 +199,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
                 if pagingEnabled {
                     
                     let pagePoint = floor((contentOffset / self.bounds.size) + 0.5) * self.bounds.size
-                    let animationVector = pagePoint - contentOffset
-
+                    
                     let shouldOvershoot = fabs(panStartContentOffset.x - pagePoint.x) > CGRectGetWidth(self.frame)/2
                                         || fabs(panStartContentOffset.y - pagePoint.y) > CGRectGetHeight(self.frame)/2
                     let overshoot:CGFloat = shouldOvershoot ? 15 : 0
