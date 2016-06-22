@@ -31,7 +31,7 @@ public protocol EndlessPageViewDataSource : class {
 }
 
 public protocol EndlessPageViewDelegate : class {
-    func endlessPageViewDidSelectItemAtIndex(index: Int)
+    func endlessPageViewDidSelectItemAtIndex(indexLocation: IndexLocation)
     func endlessPageViewDidScroll(endlessPageView: EndlessPageView)
 }
 
@@ -72,7 +72,7 @@ public class EaseOutBackInterpolation: InterpolationFunction {
 }
 
 
-public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
+public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCellDelegate {
     
     // - Public -
     
@@ -124,6 +124,8 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panGesture_scroll(_:)))
         panGestureRecognizer.delegate = self
         addGestureRecognizer(panGestureRecognizer)
+        
+        
         
         clipsToBounds = true
     }
@@ -304,6 +306,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
         
         if let cellClass = registeredCellClasses[identifier] {
             let cell = cellClass.init()
+            cell.privateDelegate = self
             cellPool[identifier]?.append(cell)
             
 //            print("generated cell for identifer: \(identifier), pool size: ", cellPool[identifier]?.count)
@@ -398,5 +401,15 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     
     public func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
+    }
+    
+    // MARK: Endless page cell delegate
+    
+    internal func didSelectCell(cell: EndlessPageCell) {
+        
+        let pagePoint = round(cell.frame.origin / self.bounds.size, tollerence: 0.0001)
+        let indexLocation = IndexLocation(column: Int(pagePoint.x), row: Int(pagePoint.y))
+        
+        delegate?.endlessPageViewDidSelectItemAtIndex(indexLocation)
     }
 }

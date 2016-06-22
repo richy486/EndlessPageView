@@ -57,7 +57,8 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
     }
     
     // MARK: Endless page view delegate
-    func endlessPageViewDidSelectItemAtIndex(index: Int) {
+    func endlessPageViewDidSelectItemAtIndex(indexLocation: IndexLocation) {
+        print("selected: \(indexLocation)")
     }
     func endlessPageViewDidScroll(endlessPageView: EndlessPageView) {
         
