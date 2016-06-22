@@ -21,7 +21,8 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
         endlessPageView.dataSource = self
         endlessPageView.delegate = self
         endlessPageView.registerClass(EndlessPageCell.self, forViewWithReuseIdentifier: "cell")
-        endlessPageView.clipsToBounds = true
+        endlessPageView.scrollDirection = .Both
+        endlessPageView.pagingEnabled = true
         view.addSubview(endlessPageView)
         
         endlessPageView.leadingAnchor.constraintEqualToAnchor(view.leadingAnchor).active = true
