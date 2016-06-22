@@ -23,6 +23,7 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
         endlessPageView.registerClass(EndlessPageCell.self, forViewWithReuseIdentifier: "cell")
         endlessPageView.scrollDirection = .Both
         endlessPageView.pagingEnabled = true
+        endlessPageView.directionalLockEnabled = true
         view.addSubview(endlessPageView)
         
         endlessPageView.leadingAnchor.constraintEqualToAnchor(view.leadingAnchor).active = true

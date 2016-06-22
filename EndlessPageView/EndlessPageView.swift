@@ -83,6 +83,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
     // Public settings
     public var scrollDirection = EndlessPageScrollDirection.Both
     public var pagingEnabled = true
+    public var directionalLockEnabled = true
     
     // - Private -
     
@@ -166,6 +167,21 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate {
                     case .Both:
                         point = (panStartContentOffset - translatePoint)
                     }
+                    
+                    
+                    if directionalLockEnabled {
+                        let deltaX = abs(panStartContentOffset.x - point.x)
+                        let deltaY = abs(panStartContentOffset.y - point.y)
+                        
+                        if deltaX != 0 && deltaY != 0 {
+                            if deltaX >= deltaY {
+                                point = CGPointMake(point.x, panStartContentOffset.y)
+                            } else {
+                                point = CGPointMake(panStartContentOffset.x, point.y)
+                            }
+                        }
+                    }
+                    
                     
                     return point
                 }()
