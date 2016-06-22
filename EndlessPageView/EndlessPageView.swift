@@ -299,6 +299,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
         if let cells = cellPool[identifier] {
             for cell in cells {
                 if cell.superview == nil {
+                    cell.prepareForReuse()
                     return cell
                 }
             }

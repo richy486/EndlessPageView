@@ -43,4 +43,9 @@ public class EndlessPageCell : UIView, UIGestureRecognizerDelegate {
     func tapGesture_select(tapGesture: UITapGestureRecognizer) {
         privateDelegate?.didSelectCell(self)
     }
+    
+    // MARK: Memory management
+    
+    public func prepareForReuse() {
+    }
 }
