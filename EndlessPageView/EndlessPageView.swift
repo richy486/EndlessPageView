@@ -33,6 +33,10 @@ public protocol EndlessPageViewDataSource : class {
 public protocol EndlessPageViewDelegate : class {
     func endlessPageViewDidSelectItemAtIndex(indexLocation: IndexLocation)
     func endlessPageViewDidScroll(endlessPageView: EndlessPageView)
+    
+    func endlessPageView(endlessPageView: EndlessPageView, willDisplayCell cell: EndlessPageCell, forItemAtIndexLocation indexLocation: IndexLocation)
+    func endlessPageView(endlessPageView: EndlessPageView, didEndDisplayingCell cell: EndlessPageCell, forItemAtIndexLocation indexLocation: IndexLocation)
+    func endlessPageViewDidEndDecelerating(endlessPageView: EndlessPageView)
 }
 
 
@@ -71,7 +75,7 @@ public class EaseOutBackInterpolation: InterpolationFunction {
     }
 }
 
-
+@IBDesignable
 public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCellDelegate {
     
     // - Public -
@@ -81,22 +85,27 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
     public weak var delegate:EndlessPageViewDelegate?
     
     // Public settings
+    public var printDebugInfo = false
     public var scrollDirection = EndlessPageScrollDirection.Both
     public var pagingEnabled = true
     public var directionalLockEnabled = true
+    public var scrollEnabled = true
     
     // - Private -
     
     // Offset position
-    private(set) public var contentOffset = CGPoint.zero
+    public var contentOffset = CGPoint.zero {
+        didSet {
+            updateBounds()
+            updateCells()
+        }
+    }
     private var panStartContentOffset = CGPoint.zero
     
     // Cell pool
     private var cellPool = [String: [EndlessPageCell]]()
     private var registeredCellClasses = [String: EndlessPageCell.Type]()
-    
-    // Data cache
-    private var visibleCells = [IndexLocation: EndlessPageCell]()
+    private var visibleCellsFromLocation = [IndexLocation: EndlessPageCell]()
     
     // Animation
     private var offsetChangeAnimation:Interpolate?
@@ -124,9 +133,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panGesture_scroll(_:)))
         panGestureRecognizer.delegate = self
         addGestureRecognizer(panGestureRecognizer)
-        
-        
-        
+
         clipsToBounds = true
     }
     
@@ -139,146 +146,245 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
         }
     }
     
+    override public func prepareForInterfaceBuilder() {
+        print("prepareForInterfaceBuilder")
+    }
     
     // MARK: Actions
     
     func panGesture_scroll(panGesture: UIPanGestureRecognizer) {
         
-        if let gestureView = panGesture.view, let holder = gestureView.superview {
-            
-            let translatePoint = panGesture.translationInView(holder)
-            
-            
-            if panGesture.state == UIGestureRecognizerState.Began {
-                panStartContentOffset = contentOffset
+        if scrollEnabled {
+            if let gestureView = panGesture.view, let holder = gestureView.superview {
                 
-                if let offsetChangeAnimation = offsetChangeAnimation {
-                    offsetChangeAnimation.stopAnimation()
-                    offsetChangeAnimation.invalidate()
-                }
-            }
-            
-            if panGesture.state == UIGestureRecognizerState.Changed {
-                contentOffset = {
-                    var point = contentOffset
-                    switch scrollDirection {
-                    case .Horizontal:
-                        point.x = (panStartContentOffset - translatePoint).x
-                    case .Vertical:
-                        point.y = (panStartContentOffset - translatePoint).y
-                    case .Both:
-                        point = (panStartContentOffset - translatePoint)
-                    }
-                    
-                    
-                    if directionalLockEnabled {
-                        let deltaX = abs(panStartContentOffset.x - point.x)
-                        let deltaY = abs(panStartContentOffset.y - point.y)
-                        
-                        if deltaX != 0 && deltaY != 0 {
-                            if deltaX >= deltaY {
-                                point = CGPointMake(point.x, panStartContentOffset.y)
-                            } else {
-                                point = CGPointMake(panStartContentOffset.x, point.y)
-                            }
-                        }
-                    }
-                    
-                    
-                    return point
-                }()
-            }
-            
-            if panGesture.state == UIGestureRecognizerState.Ended {
+                let translatePoint = panGesture.translationInView(holder)
                 
-                if let offsetChangeAnimation = offsetChangeAnimation {
-                    offsetChangeAnimation.stopAnimation()
-                    offsetChangeAnimation.invalidate()
+                
+                if panGesture.state == UIGestureRecognizerState.Began {
+                    panStartContentOffset = contentOffset
+                    
+                    if let offsetChangeAnimation = offsetChangeAnimation {
+                        offsetChangeAnimation.stopAnimation()
+                        offsetChangeAnimation.invalidate()
+                    }
                 }
                 
-                if pagingEnabled {
-                    
-                    let pagePoint = floor((contentOffset / self.bounds.size) + 0.5) * self.bounds.size
-                    
-                    let shouldOvershoot = fabs(panStartContentOffset.x - pagePoint.x) > CGRectGetWidth(self.frame)/2
-                                        || fabs(panStartContentOffset.y - pagePoint.y) > CGRectGetHeight(self.frame)/2
-                    let overshoot:CGFloat = shouldOvershoot ? 15 : 0
-                    
-                    let animationTime:CGFloat = shouldOvershoot ? 0.5 : 0.25
-                    
-                    offsetChangeAnimation = Interpolate(from: contentOffset
-                        , to: pagePoint
-                        , function: EaseOutBackInterpolation(overshoot: overshoot)
-                        , apply: { [weak self] (pos) in
-                            
-                            var position = pos
-                            if position.x.isNaN {
-                                position.x = 0.0
-                            }
-                            if position.y.isNaN {
-                                position.y = 0.0
-                            }
-                            self?.contentOffset = position
-                            self?.updateBounds()
-                            self?.updateCells()
-                        })
-                    offsetChangeAnimation?.animate(duration: animationTime)
-                    
-                } else {
-                    
-                    let velocity = panGesture.velocityInView(holder) * -1
-                    let magnitude = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2))
-                    let slideMult = magnitude / 200
-                    
-                    let slideFactor = 0.1 * slideMult
-                    
-                    let slideToPoint:CGPoint = {
-                        var point = CGPoint.zero
+                if panGesture.state == UIGestureRecognizerState.Changed {
+                    contentOffset = {
+                        var point = contentOffset
                         switch scrollDirection {
                         case .Horizontal:
-                            point = CGPoint(x: contentOffset.x + (velocity.x * slideFactor), y: contentOffset.y)
+                            point.x = (panStartContentOffset - translatePoint).x
                         case .Vertical:
-                            point = CGPoint(x: contentOffset.x, y: contentOffset.y + (velocity.y * slideFactor))
+                            point.y = (panStartContentOffset - translatePoint).y
                         case .Both:
-                            point = CGPoint(x: contentOffset.x + (velocity.x * slideFactor), y: contentOffset.y + (velocity.y * slideFactor))
+                            point = (panStartContentOffset - translatePoint)
                         }
+                        
+                        
+                        if directionalLockEnabled {
+                            let deltaX = abs(panStartContentOffset.x - point.x)
+                            let deltaY = abs(panStartContentOffset.y - point.y)
+                            
+                            if deltaX != 0 && deltaY != 0 {
+                                if deltaX >= deltaY {
+                                    point = CGPointMake(point.x, panStartContentOffset.y)
+                                } else {
+                                    point = CGPointMake(panStartContentOffset.x, point.y)
+                                }
+                            }
+                        }
+                        
                         
                         return point
                     }()
+                }
+                
+                if panGesture.state == UIGestureRecognizerState.Ended {
                     
-                    offsetChangeAnimation = Interpolate(from: contentOffset
-                        , to: slideToPoint
-                        , function: BasicInterpolation.EaseOut
-                        , apply: { [weak self] (pos) in
+                    if let offsetChangeAnimation = offsetChangeAnimation {
+                        offsetChangeAnimation.stopAnimation()
+                        offsetChangeAnimation.invalidate()
+                    }
+                    
+                    if pagingEnabled {
+                        
+                        let pagePoint = floor((contentOffset / self.bounds.size) + 0.5) * self.bounds.size
+                        
+                        let shouldOvershoot = fabs(panStartContentOffset.x - pagePoint.x) > CGRectGetWidth(self.frame)/2
+                                            || fabs(panStartContentOffset.y - pagePoint.y) > CGRectGetHeight(self.frame)/2
+                        let overshoot:CGFloat = shouldOvershoot ? 15 : 0
+                        
+                        let animationTime:CGFloat = shouldOvershoot ? 0.5 : 0.25
+                        
+                        offsetChangeAnimation = Interpolate(from: contentOffset
+                            , to: pagePoint
+                            , function: EaseOutBackInterpolation(overshoot: overshoot)
+                            , apply: { [weak self] (pos) in
+                                
+                                var position = pos
+                                if position.x.isNaN {
+                                    position.x = 0.0
+                                }
+                                if position.y.isNaN {
+                                    position.y = 0.0
+                                }
+                                self?.contentOffset = position
+                                self?.updateBounds()
+                                self?.updateCells()
+                            })
+                        offsetChangeAnimation?.animate(1.0, duration: animationTime, complete: { [weak self] in
                             
-                            var position = pos
-                            if position.x.isNaN {
-                                position.x = 0.0
+                            if let strongSelf = self {
+                                strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
                             }
-                            if position.y.isNaN {
-                                position.y = 0.0
-                            }
-                            
-                            self?.contentOffset = position
-                            self?.updateBounds()
-                            self?.updateCells()
                         })
-                    offsetChangeAnimation?.animate(duration: slideFactor * 2)
+                        
+                    } else {
+                        
+                        let velocity = panGesture.velocityInView(holder) * -1
+                        let magnitude = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2))
+                        let slideMult = magnitude / 200
+                        
+                        let slideFactor = 0.1 * slideMult
+                        
+                        let animationTime = slideFactor * 2
+                        
+                        let slideToPoint:CGPoint = {
+                            var point = CGPoint.zero
+                            switch scrollDirection {
+                            case .Horizontal:
+                                point = CGPoint(x: contentOffset.x + (velocity.x * slideFactor), y: contentOffset.y)
+                            case .Vertical:
+                                point = CGPoint(x: contentOffset.x, y: contentOffset.y + (velocity.y * slideFactor))
+                            case .Both:
+                                point = CGPoint(x: contentOffset.x + (velocity.x * slideFactor), y: contentOffset.y + (velocity.y * slideFactor))
+                            }
+                            
+                            return point
+                        }()
+                        
+                        
+                        
+                        offsetChangeAnimation = Interpolate(from: contentOffset
+                            , to: slideToPoint
+                            , function: BasicInterpolation.EaseOut
+                            , apply: { [weak self] (pos) in
+                                
+                                var position = pos
+                                if position.x.isNaN {
+                                    position.x = 0.0
+                                }
+                                if position.y.isNaN {
+                                    position.y = 0.0
+                                }
+                                
+                                self?.contentOffset = position
+                            })
+                        offsetChangeAnimation?.animate(1.0, duration: animationTime, complete: { [weak self] in
+                            
+                            if let strongSelf = self {
+                                strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
+                            }
+                        })
+                    }
                 }
             }
-            
-            updateBounds()
-            updateCells()
         }
         
+    }
+    
+    // MARK: Public getters
+    
+    public func visibleCells() -> [EndlessPageCell] {
+        return Array(visibleCellsFromLocation.values)
+    }
+    
+    public func indexLocationsForVisibleItems() -> [IndexLocation] {
+        return Array(visibleCellsFromLocation.keys)
+    }
+    
+    public func indexLocationForCell(cell: EndlessPageCell) -> IndexLocation? {
+        let pagePoint = round(cell.frame.origin / self.bounds.size, tollerence: 0.0001)
+        
+        if !pagePoint.x.isNaN && !pagePoint.y.isNaN {
+            let indexLocation = IndexLocation(column: Int(pagePoint.x), row: Int(pagePoint.y))
+            return indexLocation
+        }
+        
+        return nil
+    }
+    
+    public func setContentOffset(offset: CGPoint, animated: Bool) {
+        if let indexLocation = indexLocationForItemAtPoint(offset) {
+            scrollToItemAtIndexLocation(indexLocation, animated: animated)
+        }
+        
+    }
+    
+    public func indexLocationForItemAtPoint(point: CGPoint) -> IndexLocation? {
+        let pagePoint = round(point / self.bounds.size, tollerence: 0.0001)
+        if !pagePoint.x.isNaN && !pagePoint.y.isNaN {
+            let indexLocation = IndexLocation(column: Int(pagePoint.x), row: Int(pagePoint.y))
+            
+            return indexLocation
+        }
+        return nil
+    }
+    
+    public func indexLocationFromContentOffset() -> IndexLocation? {
+        return indexLocationForItemAtPoint(contentOffset)
+    }
+    
+    public func cellForItemAtIndexLocation(indexLocation: IndexLocation) -> EndlessPageCell? {
+        if let cell = visibleCellsFromLocation[indexLocation] {
+            return cell
+        } else if let cell = dataSource?.endlessPageView(self, cellForIndexLocation: indexLocation) {
+            visibleCellsFromLocation[indexLocation] = cell
+            addSubview(cell)
+            delegate?.endlessPageView(self, willDisplayCell: cell, forItemAtIndexLocation: indexLocation)
+            return cell
+        }
+        
+        return nil
+    }
+    public func scrollToItemAtIndexLocation(indexLocation: IndexLocation, animated:Bool) {
+        
+        let animationTime = animated ? CGFloat(0.25) : CGFloat(0.0)
+        
+        let pagePoint = CGPoint(x: indexLocation.column, y: indexLocation.row) * self.bounds.size
+        
+        if let offsetChangeAnimation = offsetChangeAnimation {
+            offsetChangeAnimation.stopAnimation()
+            offsetChangeAnimation.invalidate()
+        }
+        
+        offsetChangeAnimation = Interpolate(from: contentOffset
+            , to: pagePoint
+            , function: BasicInterpolation.EaseOut
+            , apply: { [weak self] (pos) in
+                
+                var position = pos
+                if position.x.isNaN {
+                    position.x = 0.0
+                }
+                if position.y.isNaN {
+                    position.y = 0.0
+                }
+                self?.contentOffset = position
+            })
+        offsetChangeAnimation?.animate(1.0, duration: animationTime, complete: { [weak self] in
+            
+            if let strongSelf = self {
+                strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
+            }
+        })
     }
     
     // MARK: Data cache
     
     public func reloadData() {
         contentOffset = CGPoint.zero
-        updateBounds()
-        updateCells()
     }
     
     public func registerClass(cellClass: EndlessPageCell.Type?, forViewWithReuseIdentifier identifier: String) {
@@ -309,7 +415,9 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
             cell.privateDelegate = self
             cellPool[identifier]?.append(cell)
             
-//            print("generated cell for identifer: \(identifier), pool size: ", cellPool[identifier]?.count)
+            if printDebugInfo {
+                print("generated cell for identifer: \(identifier), pool size: ", cellPool[identifier]?.count)
+            }
             
             return cell
         }
@@ -357,19 +465,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
                     let indexLocation = IndexLocation(column: column, row: row)
                     updatedVisibleCellIndexLocations.append(indexLocation)
                     
-                    let cell:EndlessPageCell? = {
-                        if let cell = visibleCells[indexLocation] {
-                            return cell
-                        } else if let cell = dataSource?.endlessPageView(self, cellForIndexLocation: indexLocation) {
-                            visibleCells[indexLocation] = cell
-                            addSubview(cell)
-                            return cell
-                        }
-                        
-                        return nil
-                    }()
-                    
-                    if let cell = cell {
+                    if let cell = cellForItemAtIndexLocation(indexLocation) {
                         cell.frame = CGRect(x: CGRectGetWidth(self.frame) * CGFloat(column)
                             , y: CGRectGetHeight(self.frame) * CGFloat(row)
                             , width: CGRectGetWidth(self.frame)
@@ -377,19 +473,26 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
                     }
                 }
             }
-//            let oldCount = visibleCells.count
             
-            let previousKeys = visibleCells.keys
+            let oldCount = visibleCellsFromLocation.count
+            
+            let previousKeys = visibleCellsFromLocation.keys
             let removedKeys = previousKeys.filter( { !updatedVisibleCellIndexLocations.contains($0) } )
             
             removedKeys.forEach({ (indexLocation) in
-                visibleCells[indexLocation]?.removeFromSuperview()
-                visibleCells[indexLocation] = nil
+                
+                if let cell = visibleCellsFromLocation[indexLocation] {
+                    delegate?.endlessPageView(self, didEndDisplayingCell: cell, forItemAtIndexLocation: indexLocation)
+                    cell.removeFromSuperview()
+                }
+                visibleCellsFromLocation[indexLocation] = nil
             })
             
-//            if oldCount != visibleCells.count {
-//                print("removed \(oldCount - visibleCells.count) cells")
-//            }
+            if printDebugInfo {
+                if oldCount != visibleCellsFromLocation.count {
+                    print("removed \(oldCount - visibleCellsFromLocation.count) cells")
+                }
+            }
         } else {
             print("Error in page offset: \(pageOffset)")
         }
@@ -407,9 +510,8 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
     
     internal func didSelectCell(cell: EndlessPageCell) {
         
-        let pagePoint = round(cell.frame.origin / self.bounds.size, tollerence: 0.0001)
-        let indexLocation = IndexLocation(column: Int(pagePoint.x), row: Int(pagePoint.y))
-        
-        delegate?.endlessPageViewDidSelectItemAtIndex(indexLocation)
+        if let indexLocation = self.indexLocationForCell(cell) {
+            delegate?.endlessPageViewDidSelectItemAtIndex(indexLocation)
+        }
     }
 }
