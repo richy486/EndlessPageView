@@ -101,6 +101,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
         }
     }
     private var panStartContentOffset = CGPoint.zero
+    private var directionLockedTo = EndlessPageScrollDirection.Both
     
     // Cell pool
     private var cellPool = [String: [EndlessPageCell]]()
@@ -162,6 +163,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
                 
                 if panGesture.state == UIGestureRecognizerState.Began {
                     panStartContentOffset = contentOffset
+                    directionLockedTo = .Both
                     
                     if let offsetChangeAnimation = offsetChangeAnimation {
                         offsetChangeAnimation.stopAnimation()
@@ -183,15 +185,25 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
                         
                         
                         if directionalLockEnabled {
-                            let deltaX = abs(panStartContentOffset.x - point.x)
-                            let deltaY = abs(panStartContentOffset.y - point.y)
                             
-                            if deltaX != 0 && deltaY != 0 {
-                                if deltaX >= deltaY {
-                                    point = CGPointMake(point.x, panStartContentOffset.y)
-                                } else {
-                                    point = CGPointMake(panStartContentOffset.x, point.y)
+                            if directionLockedTo == .Both {
+                                let deltaX = abs(panStartContentOffset.x - point.x)
+                                let deltaY = abs(panStartContentOffset.y - point.y)
+                                
+                                if deltaX != 0 && deltaY != 0 {
+                                    if deltaX >= deltaY {
+                                        directionLockedTo = .Horizontal
+                                        
+                                    } else {
+                                        directionLockedTo = .Vertical
+                                    }
                                 }
+                            }
+                            
+                            if directionLockedTo == .Horizontal {
+                                point = CGPointMake(point.x, panStartContentOffset.y)
+                            } else if directionLockedTo == .Vertical {
+                                point = CGPointMake(panStartContentOffset.x, point.y)
                             }
                         }
                         
