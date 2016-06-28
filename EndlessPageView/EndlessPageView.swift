@@ -27,52 +27,29 @@ public func == (lhs: IndexLocation, rhs: IndexLocation) -> Bool {
 }
 
 public protocol EndlessPageViewDataSource : class {
-    func endlessPageView(endlessPageView:EndlessPageView, cellForIndexLocation indexLocation: IndexLocation) -> EndlessPageCell
+    func endlessPageView(endlessPageView:EndlessPageView, cellForIndexLocation indexLocation: IndexLocation) -> EndlessPageCell?
 }
 
 public protocol EndlessPageViewDelegate : class {
     func endlessPageViewDidSelectItemAtIndex(indexLocation: IndexLocation)
     func endlessPageViewDidScroll(endlessPageView: EndlessPageView)
+    func endlessPageViewShouldScroll(endlessPageView: EndlessPageView, scrollingDirection: EndlessPageScrollDirectionRules) -> EndlessPageScrollDirectionRules
     
     func endlessPageView(endlessPageView: EndlessPageView, willDisplayCell cell: EndlessPageCell, forItemAtIndexLocation indexLocation: IndexLocation)
     func endlessPageView(endlessPageView: EndlessPageView, didEndDisplayingCell cell: EndlessPageCell, forItemAtIndexLocation indexLocation: IndexLocation)
     func endlessPageViewDidEndDecelerating(endlessPageView: EndlessPageView)
 }
 
-
-public enum EndlessPageScrollDirection {
-    case Horizontal
-    case Vertical
-    case Both
-}
-
-public class EaseOutBackInterpolation: InterpolationFunction {
+public struct EndlessPageScrollDirectionRules : OptionSetType {
+    public var rawValue : UInt8
     
-    public var overshoot: CGFloat = 10.0
-    
-    private let p1 = CGFloat(0.0)
-    private let p2 = CGFloat(1.0)
-    private let p3 = CGFloat(0.0)
-    
-    public init(overshoot: CGFloat) {
-        self.overshoot = overshoot
+    public init(rawValue: UInt8) {
+        self.rawValue = rawValue
     }
     
-    public func apply(progress: CGFloat) -> CGFloat {
-        
-        let overshootInverse = -overshoot
-        return catmullRom(progress, p0: overshootInverse, p1: p1, p2: p2, p3: p3)
-    }
-    
-    // using Catmull-Rom interpolation
-    // http://flexmonkey.blogspot.com/2016/01/playing-with-interpolation-functions-in.html
-    func catmullRom(t: CGFloat, p0: CGFloat, p1: CGFloat, p2: CGFloat, p3: CGFloat) -> CGFloat {
-        let a = (2 * p1)
-        let b = (-p0 + p2) * t
-        let c = (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t
-        let d = (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t
-        return 0.5 * (a + b + c + d)
-    }
+    public static let Horizontal = EndlessPageScrollDirectionRules(rawValue: 1 << 0)
+    public static let Vertical = EndlessPageScrollDirectionRules(rawValue: 1 << 2)
+    public static var Both : EndlessPageScrollDirectionRules = [ .Horizontal, .Vertical ]
 }
 
 @IBDesignable
@@ -86,10 +63,9 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
     
     // Public settings
     public var printDebugInfo = false
-    public var scrollDirection = EndlessPageScrollDirection.Both
+    public var scrollDirection:EndlessPageScrollDirectionRules = .Both
     public var pagingEnabled = true
     public var directionalLockEnabled = true
-    public var scrollEnabled = true
     
     // - Private -
     
@@ -101,7 +77,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
         }
     }
     private var panStartContentOffset = CGPoint.zero
-    private var directionLockedTo = EndlessPageScrollDirection.Both
+    private var directionLockedTo:EndlessPageScrollDirectionRules = .Both
     
     // Cell pool
     private var cellPool = [String: [EndlessPageCell]]()
@@ -155,154 +131,173 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
     
     func panGesture_scroll(panGesture: UIPanGestureRecognizer) {
         
-        if scrollEnabled {
-            if let gestureView = panGesture.view, let holder = gestureView.superview {
+        if let gestureView = panGesture.view, let holder = gestureView.superview {
+            
+            let translatePoint = panGesture.translationInView(holder)
+            
+            
+            if panGesture.state == UIGestureRecognizerState.Began {
+                panStartContentOffset = contentOffset
+                directionLockedTo = .Both
                 
-                let translatePoint = panGesture.translationInView(holder)
-                
-                
-                if panGesture.state == UIGestureRecognizerState.Began {
-                    panStartContentOffset = contentOffset
-                    directionLockedTo = .Both
-                    
-                    if let offsetChangeAnimation = offsetChangeAnimation {
-                        offsetChangeAnimation.stopAnimation()
-                        offsetChangeAnimation.invalidate()
-                    }
+                if let offsetChangeAnimation = offsetChangeAnimation {
+                    offsetChangeAnimation.stopAnimation()
+                    offsetChangeAnimation.invalidate()
                 }
-                
-                if panGesture.state == UIGestureRecognizerState.Changed {
-                    contentOffset = {
-                        var point = contentOffset
-                        switch scrollDirection {
-                        case .Horizontal:
-                            point.x = (panStartContentOffset - translatePoint).x
-                        case .Vertical:
-                            point.y = (panStartContentOffset - translatePoint).y
-                        case .Both:
-                            point = (panStartContentOffset - translatePoint)
-                        }
+            }
+            
+            if panGesture.state == UIGestureRecognizerState.Changed {
+                contentOffset = {
+                    var point = contentOffset
+                    
+                    guard scrollDirection != [] else { return panStartContentOffset }
+                    
+                    if scrollDirection.contains(.Horizontal) {
+                        point.x = (panStartContentOffset - translatePoint).x
+                    }
+                    if scrollDirection.contains(.Vertical) {
+                        point.y = (panStartContentOffset - translatePoint).y
+                    }
+                    
+                    if directionalLockEnabled {
                         
-                        
-                        if directionalLockEnabled {
+                        if directionLockedTo == .Both {
                             
-                            if directionLockedTo == .Both {
-                                let deltaX = abs(panStartContentOffset.x - point.x)
-                                let deltaY = abs(panStartContentOffset.y - point.y)
-                                
-                                if deltaX != 0 && deltaY != 0 {
-                                    if deltaX >= deltaY {
-                                        directionLockedTo = .Horizontal
-                                        
-                                    } else {
-                                        directionLockedTo = .Vertical
-                                    }
+                            let deltaX = abs(panStartContentOffset.x - point.x)
+                            let deltaY = abs(panStartContentOffset.y - point.y)
+                            
+                            if deltaX != 0 && deltaY != 0 {
+                                if deltaX >= deltaY {
+                                    directionLockedTo = [.Horizontal]
+                                } else {
+                                    directionLockedTo = [.Vertical]
                                 }
                             }
-                            
-                            if directionLockedTo == .Horizontal {
-                                point = CGPointMake(point.x, panStartContentOffset.y)
-                            } else if directionLockedTo == .Vertical {
-                                point = CGPointMake(panStartContentOffset.x, point.y)
-                            }
+                        }
+                    }
+                    
+                    guard directionLockedTo != [] else {
+                        return panStartContentOffset
+                    }
+                    
+                    if let allowedScrollDirection = delegate?.endlessPageViewShouldScroll(self, scrollingDirection: directionLockedTo) {
+                        
+                        guard allowedScrollDirection != [] else {
+                            return panStartContentOffset
                         }
                         
+                        if !allowedScrollDirection.contains(.Horizontal) {
+                            point.x = panStartContentOffset.x
+                        }
+                        
+                        if !allowedScrollDirection.contains(.Vertical) {
+                            point.y = panStartContentOffset.y
+                        }
+                    }
+                    
+                    
+                    return point
+                }()
+            }
+            
+            if panGesture.state == UIGestureRecognizerState.Ended {
+                
+                if let offsetChangeAnimation = offsetChangeAnimation {
+                    offsetChangeAnimation.stopAnimation()
+                    offsetChangeAnimation.invalidate()
+                }
+                
+                if pagingEnabled {
+                    
+                    let offsetPage = floor((contentOffset / self.bounds.size) + 0.5)
+                    let targetColumn = Int(offsetPage.x)
+                    let targetRow = Int(offsetPage.y)
+                    var pagePoint = CGPoint(x: CGFloat(targetColumn), y: CGFloat(targetRow)) * self.bounds.size
+                    
+                    // Check if cell exists, we already have loaded the visible cells
+                    if visibleCellsFromLocation[IndexLocation(column: targetColumn, row: targetRow)] == nil {
+                        
+                        let offsetPage = floor((panStartContentOffset / self.bounds.size) + 0.5)
+                        let targetColumn = Int(offsetPage.x)
+                        let targetRow = Int(offsetPage.y)
+                        pagePoint = CGPoint(x: CGFloat(targetColumn), y: CGFloat(targetRow)) * self.bounds.size
+                    }
+                    
+                    let animationTime:CGFloat = 0.2
+                    
+                    offsetChangeAnimation = Interpolate(from: contentOffset
+                        , to: pagePoint
+                        , function: BasicInterpolation.EaseOut
+                        , apply: { [weak self] (pos) in
+                            
+                            var position = pos
+                            if position.x.isNaN {
+                                position.x = 0.0
+                            }
+                            if position.y.isNaN {
+                                position.y = 0.0
+                            }
+                            self?.contentOffset = position
+                            self?.updateBounds()
+                            self?.updateCells()
+                        })
+                    offsetChangeAnimation?.animate(1.0, duration: animationTime, complete: { [weak self] in
+                        
+                        if let strongSelf = self {
+                            strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
+                        }
+                        })
+                    
+                } else {
+                    
+                    let velocity = panGesture.velocityInView(holder) * -1
+                    let magnitude = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2))
+                    let slideMult = magnitude / 200
+                    
+                    let slideFactor = 0.1 * slideMult
+                    
+                    let animationTime = slideFactor * 2
+                    
+                    let slideToPoint:CGPoint = {
+                        var point = contentOffset
+                        
+                        if scrollDirection.contains(.Horizontal) {
+                            point.x = contentOffset.x + (velocity.x * slideFactor)
+                        }
+                        if scrollDirection.contains(.Vertical) {
+                            point.y = contentOffset.y + (velocity.y * slideFactor)
+                        }
                         
                         return point
                     }()
-                }
-                
-                if panGesture.state == UIGestureRecognizerState.Ended {
                     
-                    if let offsetChangeAnimation = offsetChangeAnimation {
-                        offsetChangeAnimation.stopAnimation()
-                        offsetChangeAnimation.invalidate()
-                    }
                     
-                    if pagingEnabled {
-                        
-                        let pagePoint = floor((contentOffset / self.bounds.size) + 0.5) * self.bounds.size
-                        
-                        let shouldOvershoot = fabs(panStartContentOffset.x - pagePoint.x) > CGRectGetWidth(self.frame)/2
-                                            || fabs(panStartContentOffset.y - pagePoint.y) > CGRectGetHeight(self.frame)/2
-                        let overshoot:CGFloat = shouldOvershoot ? 15 : 0
-                        
-                        let animationTime:CGFloat = shouldOvershoot ? 0.5 : 0.25
-                        
-                        offsetChangeAnimation = Interpolate(from: contentOffset
-                            , to: pagePoint
-                            , function: EaseOutBackInterpolation(overshoot: overshoot)
-                            , apply: { [weak self] (pos) in
-                                
-                                var position = pos
-                                if position.x.isNaN {
-                                    position.x = 0.0
-                                }
-                                if position.y.isNaN {
-                                    position.y = 0.0
-                                }
-                                self?.contentOffset = position
-                                self?.updateBounds()
-                                self?.updateCells()
-                            })
-                        offsetChangeAnimation?.animate(1.0, duration: animationTime, complete: { [weak self] in
+                    
+                    offsetChangeAnimation = Interpolate(from: contentOffset
+                        , to: slideToPoint
+                        , function: BasicInterpolation.EaseOut
+                        , apply: { [weak self] (pos) in
                             
-                            if let strongSelf = self {
-                                strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
+                            var position = pos
+                            if position.x.isNaN {
+                                position.x = 0.0
                             }
+                            if position.y.isNaN {
+                                position.y = 0.0
+                            }
+                            
+                            self?.contentOffset = position
                         })
+                    offsetChangeAnimation?.animate(1.0, duration: animationTime, complete: { [weak self] in
                         
-                    } else {
-                        
-                        let velocity = panGesture.velocityInView(holder) * -1
-                        let magnitude = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2))
-                        let slideMult = magnitude / 200
-                        
-                        let slideFactor = 0.1 * slideMult
-                        
-                        let animationTime = slideFactor * 2
-                        
-                        let slideToPoint:CGPoint = {
-                            var point = CGPoint.zero
-                            switch scrollDirection {
-                            case .Horizontal:
-                                point = CGPoint(x: contentOffset.x + (velocity.x * slideFactor), y: contentOffset.y)
-                            case .Vertical:
-                                point = CGPoint(x: contentOffset.x, y: contentOffset.y + (velocity.y * slideFactor))
-                            case .Both:
-                                point = CGPoint(x: contentOffset.x + (velocity.x * slideFactor), y: contentOffset.y + (velocity.y * slideFactor))
-                            }
-                            
-                            return point
-                        }()
-                        
-                        
-                        
-                        offsetChangeAnimation = Interpolate(from: contentOffset
-                            , to: slideToPoint
-                            , function: BasicInterpolation.EaseOut
-                            , apply: { [weak self] (pos) in
-                                
-                                var position = pos
-                                if position.x.isNaN {
-                                    position.x = 0.0
-                                }
-                                if position.y.isNaN {
-                                    position.y = 0.0
-                                }
-                                
-                                self?.contentOffset = position
-                            })
-                        offsetChangeAnimation?.animate(1.0, duration: animationTime, complete: { [weak self] in
-                            
-                            if let strongSelf = self {
-                                strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
-                            }
+                        if let strongSelf = self {
+                            strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
+                        }
                         })
-                    }
                 }
             }
         }
+        
         
     }
     
@@ -390,7 +385,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
             if let strongSelf = self {
                 strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
             }
-        })
+            })
     }
     
     // MARK: Data cache
@@ -448,7 +443,7 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
     
     private func updateCells() {
         let pageOffset = round(contentOffset / CGPoint(x: CGRectGetWidth(self.frame), y: CGRectGetHeight(self.frame))
-                            , tollerence: 0.0001)
+            , tollerence: 0.0001)
         
         if !pageOffset.x.isNaN && !pageOffset.y.isNaN {
             
@@ -475,13 +470,13 @@ public class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPage
                 for column in columns {
                     
                     let indexLocation = IndexLocation(column: column, row: row)
-                    updatedVisibleCellIndexLocations.append(indexLocation)
                     
                     if let cell = cellForItemAtIndexLocation(indexLocation) {
                         cell.frame = CGRect(x: CGRectGetWidth(self.frame) * CGFloat(column)
                             , y: CGRectGetHeight(self.frame) * CGFloat(row)
                             , width: CGRectGetWidth(self.frame)
                             , height: CGRectGetHeight(self.frame))
+                        updatedVisibleCellIndexLocations.append(indexLocation)
                     }
                 }
             }

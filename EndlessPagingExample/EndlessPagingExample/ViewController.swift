@@ -50,7 +50,7 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
     }
     
     // MARK: Endless page view datasource
-    func endlessPageView(endlessPageView: EndlessPageView, cellForIndexLocation indexLocation: IndexLocation) -> EndlessPageCell {
+    func endlessPageView(endlessPageView:EndlessPageView, cellForIndexLocation indexLocation: IndexLocation) -> EndlessPageCell? {
         
         let cell = endlessPageView.dequeueReusableCellWithReuseIdentifier("cell")
         cell.backgroundColor = UIColor(hue: CGFloat(1.0 - fabs(Float(indexLocation.row) / 10) % 1)
@@ -70,6 +70,9 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
     func endlessPageViewDidScroll(endlessPageView: EndlessPageView) {
         
         //print(String(format: "%.02f, %.02f", endlessPageView.contentOffset.x, endlessPageView.contentOffset.y))
+    }
+    func endlessPageViewShouldScroll(endlessPageView: EndlessPageView, scrollingDirection: EndlessPageScrollDirectionRules) -> EndlessPageScrollDirectionRules {
+        return EndlessPageScrollDirectionRules.Both.intersect(scrollingDirection)
     }
     func endlessPageView(endlessPageView: EndlessPageView, willDisplayCell cell: EndlessPageCell, forItemAtIndexLocation indexLocation: IndexLocation) {
         print("willDisplayCell: \(cell), at: \(indexLocation)")
