@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CA540ACF1DA29AF900BBF6CB /* Interpolate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA540ACE1DA29AF900BBF6CB /* Interpolate.framework */; };
 		CA76C7581D199A9400A33806 /* EndlessPageView.h in Headers */ = {isa = PBXBuildFile; fileRef = CA76C7571D199A9400A33806 /* EndlessPageView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CA76C76F1D199F5B00A33806 /* EndlessPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA76C76E1D199F5B00A33806 /* EndlessPageView.swift */; };
 		CA76C7711D19A02100A33806 /* EndlessPageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA76C7701D19A02100A33806 /* EndlessPageCell.swift */; };
@@ -14,6 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CA540ACE1DA29AF900BBF6CB /* Interpolate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Interpolate.framework; path = Carthage/Build/iOS/Interpolate.framework; sourceTree = "<group>"; };
 		CA76C7541D199A9400A33806 /* EndlessPageView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EndlessPageView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA76C7571D199A9400A33806 /* EndlessPageView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EndlessPageView.h; sourceTree = "<group>"; };
 		CA76C7591D199A9400A33806 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -27,17 +29,27 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA540ACF1DA29AF900BBF6CB /* Interpolate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CA540ACD1DA29AF900BBF6CB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CA540ACE1DA29AF900BBF6CB /* Interpolate.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		CA76C74A1D199A9400A33806 = {
 			isa = PBXGroup;
 			children = (
 				CA76C7561D199A9400A33806 /* EndlessPageView */,
 				CA76C7551D199A9400A33806 /* Products */,
+				CA540ACD1DA29AF900BBF6CB /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -83,6 +95,7 @@
 				CA76C7501D199A9400A33806 /* Frameworks */,
 				CA76C7511D199A9400A33806 /* Headers */,
 				CA76C7521D199A9400A33806 /* Resources */,
+				CA540AD01DA29B4200BBF6CB /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -105,6 +118,7 @@
 				TargetAttributes = {
 					CA76C7531D199A9400A33806 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 6RE8S7MP65;
 						LastSwiftMigration = 0800;
 					};
 				};
@@ -135,6 +149,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		CA540AD01DA29B4200BBF6CB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/iOS/Interpolate.framework",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		CA76C74F1D199A9400A33806 /* Sources */ = {
@@ -250,8 +281,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 6RE8S7MP65;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
