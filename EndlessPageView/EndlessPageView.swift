@@ -267,8 +267,9 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
                         pagePoint = CGPoint(x: CGFloat(targetColumn), y: CGFloat(targetRow)) * self.bounds.size
                     }
                     
-                    
-                    print("targetColumn: \(targetColumn), targetRow: \(targetRow)")
+                    if printDebugInfo {
+                        print("targetColumn: \(targetColumn), targetRow: \(targetRow)")
+                    }
                     
                     let animationTime:TimeInterval = 0.2
                     
