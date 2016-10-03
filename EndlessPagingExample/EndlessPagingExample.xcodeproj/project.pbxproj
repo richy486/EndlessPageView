@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		B98A3AC31D1C7A91001BEC40 /* EndlessPageView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B98A3ABC1D1C785E001BEC40 /* EndlessPageView.framework */; };
 		B98A3AC41D1C7A91001BEC40 /* EndlessPageView.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B98A3ABC1D1C785E001BEC40 /* EndlessPageView.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B98A3AC61D1C7A94001BEC40 /* Interpolate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B98A3AC01D1C7910001BEC40 /* Interpolate.framework */; };
-		B98A3AC71D1C7A94001BEC40 /* Interpolate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B98A3AC01D1C7910001BEC40 /* Interpolate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CA3676321D19C5E400B227BF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA3676311D19C5E400B227BF /* AppDelegate.swift */; };
 		CA3676341D19C5E400B227BF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA3676331D19C5E400B227BF /* ViewController.swift */; };
 		CA3676371D19C5E400B227BF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA3676351D19C5E400B227BF /* Main.storyboard */; };
@@ -25,7 +23,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				B98A3AC71D1C7A94001BEC40 /* Interpolate.framework in Embed Frameworks */,
 				B98A3AC41D1C7A91001BEC40 /* EndlessPageView.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -35,7 +32,6 @@
 
 /* Begin PBXFileReference section */
 		B98A3ABC1D1C785E001BEC40 /* EndlessPageView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = EndlessPageView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B98A3AC01D1C7910001BEC40 /* Interpolate.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Interpolate.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA36762E1D19C5E400B227BF /* EndlessPagingExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EndlessPagingExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA3676311D19C5E400B227BF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CA3676331D19C5E400B227BF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -50,7 +46,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B98A3AC61D1C7A94001BEC40 /* Interpolate.framework in Frameworks */,
 				B98A3AC31D1C7A91001BEC40 /* EndlessPageView.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -61,7 +56,6 @@
 		CA3676251D19C5E400B227BF = {
 			isa = PBXGroup;
 			children = (
-				B98A3AC01D1C7910001BEC40 /* Interpolate.framework */,
 				B98A3ABC1D1C785E001BEC40 /* EndlessPageView.framework */,
 				CA3676301D19C5E400B227BF /* EndlessPagingExample */,
 				CA36762F1D19C5E400B227BF /* Products */,
@@ -117,11 +111,13 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Richard Adem";
 				TargetAttributes = {
 					CA36762D1D19C5E400B227BF = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = N9B588RPK7;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -202,8 +198,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -247,8 +245,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -267,6 +267,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -275,11 +276,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = N9B588RPK7;
 				INFOPLIST_FILE = EndlessPagingExample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.EndlessPagingExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -287,11 +290,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = N9B588RPK7;
 				INFOPLIST_FILE = EndlessPagingExample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.EndlessPagingExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

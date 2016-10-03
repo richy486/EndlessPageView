@@ -11,6 +11,8 @@ import EndlessPageView
 
 class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageViewDelegate {
     
+
+    
     let endlessPageView = EndlessPageView()
     
     override func viewDidLoad() {
@@ -26,17 +28,17 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
         endlessPageView.directionalLockEnabled = true
         view.addSubview(endlessPageView)
         
-        endlessPageView.leadingAnchor.constraintEqualToAnchor(view.leadingAnchor).active = true
-        endlessPageView.trailingAnchor.constraintEqualToAnchor(view.trailingAnchor).active = true
+        endlessPageView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        endlessPageView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
-        endlessPageView.topAnchor.constraintEqualToAnchor(view.topAnchor).active = true
-        endlessPageView.bottomAnchor.constraintEqualToAnchor(view.bottomAnchor).active = true
+        endlessPageView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        endlessPageView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
         
     }
     
-    override func motionEnded(motion: UIEventSubtype, withEvent event: UIEvent?) {
-        if motion == .MotionShake {
+    override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
+        if motion == .motionShake {
             print("shake")
             
             if endlessPageView.contentOffset.x < 1 && endlessPageView.contentOffset.y < 1 {
@@ -50,12 +52,12 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
     }
     
     // MARK: Endless page view datasource
-    func endlessPageView(endlessPageView:EndlessPageView, cellForIndexLocation indexLocation: IndexLocation) -> EndlessPageCell? {
+    func endlessPageView(_ endlessPageView:EndlessPageView, cellForIndexLocation indexLocation: IndexLocation) -> EndlessPageCell? {
         
         let cell = endlessPageView.dequeueReusableCellWithReuseIdentifier("cell")
-        cell.backgroundColor = UIColor(hue: CGFloat(1.0 - fabs(Float(indexLocation.row) / 10) % 1)
+        cell.backgroundColor = UIColor(hue: CGFloat(1.0 - fabs(Float(indexLocation.row) / 10).truncatingRemainder(dividingBy: 1))
             , saturation: 0.75
-            , brightness: CGFloat(1.0 - fabs(Float(indexLocation.column) / 10) % 1)
+            , brightness: CGFloat(1.0 - fabs(Float(indexLocation.column) / 10).truncatingRemainder(dividingBy: 1))
             , alpha: 1.0)
         
         print("cellForIndexLocation: \(indexLocation), color: \(cell.backgroundColor)")
@@ -64,23 +66,26 @@ class ViewController: UIViewController, EndlessPageViewDataSource, EndlessPageVi
     }
     
     // MARK: Endless page view delegate
-    func endlessPageViewDidSelectItemAtIndex(indexLocation: IndexLocation) {
+    func endlessPageViewDidSelectItemAtIndex(_ indexLocation: IndexLocation) {
         print("selected: \(indexLocation)")
     }
-    func endlessPageViewDidScroll(endlessPageView: EndlessPageView) {
+    public func endlessPageViewWillScroll(_ endlessPageView: EndlessPageView) {
+        
+    }
+    func endlessPageViewDidScroll(_ endlessPageView: EndlessPageView) {
         
         //print(String(format: "%.02f, %.02f", endlessPageView.contentOffset.x, endlessPageView.contentOffset.y))
     }
-    func endlessPageViewShouldScroll(endlessPageView: EndlessPageView, scrollingDirection: EndlessPageScrollDirectionRules) -> EndlessPageScrollDirectionRules {
-        return EndlessPageScrollDirectionRules.Both.intersect(scrollingDirection)
+    func endlessPageViewShouldScroll(_ endlessPageView: EndlessPageView, scrollingDirection: EndlessPageScrollDirectionRules) -> EndlessPageScrollDirectionRules {
+        return EndlessPageScrollDirectionRules.Both.intersection(scrollingDirection)
     }
-    func endlessPageView(endlessPageView: EndlessPageView, willDisplayCell cell: EndlessPageCell, forItemAtIndexLocation indexLocation: IndexLocation) {
+    func endlessPageView(_ endlessPageView: EndlessPageView, willDisplayCell cell: EndlessPageCell, forItemAtIndexLocation indexLocation: IndexLocation) {
         print("willDisplayCell: \(cell), at: \(indexLocation)")
     }
-    func endlessPageView(endlessPageView: EndlessPageView, didEndDisplayingCell cell: EndlessPageCell, forItemAtIndexLocation indexLocation: IndexLocation) {
+    func endlessPageView(_ endlessPageView: EndlessPageView, didEndDisplayingCell cell: EndlessPageCell, forItemAtIndexLocation indexLocation: IndexLocation) {
         print("didEndDisplayingCell: \(cell), at: \(indexLocation)")
     }
-    func endlessPageViewDidEndDecelerating(endlessPageView: EndlessPageView) {
+    func endlessPageViewDidEndDecelerating(_ endlessPageView: EndlessPageView) {
         print("endlessPageViewDidEndDecelerating")
         
         print("visible cells: \(endlessPageView.visibleCells())")

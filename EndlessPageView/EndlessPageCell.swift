@@ -9,14 +9,14 @@
 import UIKit
 
 internal protocol _EndlessPageCellDelegate {
-    func didSelectCell(cell: EndlessPageCell)
+    func didSelectCell(_ cell: EndlessPageCell)
 }
 
-public class EndlessPageCell : UIView, UIGestureRecognizerDelegate {
+open class EndlessPageCell : UIView, UIGestureRecognizerDelegate {
     
     internal var privateDelegate:_EndlessPageCellDelegate?
     
-    override public init(frame: CGRect) {
+    required override public init(frame: CGRect) {
         super.init(frame: frame)
         
         setup()
@@ -31,7 +31,7 @@ public class EndlessPageCell : UIView, UIGestureRecognizerDelegate {
         setup()
     }
     
-    private func setup() {
+    fileprivate func setup() {
     
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapGesture_select(_:)))
         tapGestureRecognizer.delegate = self
@@ -40,12 +40,12 @@ public class EndlessPageCell : UIView, UIGestureRecognizerDelegate {
     
     // MARK: Gestures
     
-    func tapGesture_select(tapGesture: UITapGestureRecognizer) {
+    func tapGesture_select(_ tapGesture: UITapGestureRecognizer) {
         privateDelegate?.didSelectCell(self)
     }
     
     // MARK: Memory management
     
-    public func prepareForReuse() {
+    open func prepareForReuse() {
     }
 }

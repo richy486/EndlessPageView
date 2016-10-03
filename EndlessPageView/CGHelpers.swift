@@ -11,8 +11,8 @@ import Foundation
 
 // CGFloat
 
-func round(value: CGFloat, tollerence:CGFloat)-> CGFloat {
-    if fabs(value) % 1.0 < tollerence || fabs(value) % 1.0 > 1.0 - tollerence {
+func round(_ value: CGFloat, tollerence:CGFloat)-> CGFloat {
+    if fabs(value).truncatingRemainder(dividingBy: 1.0) < tollerence || fabs(value).truncatingRemainder(dividingBy: 1.0) > 1.0 - tollerence {
         return round(value)
     }
     return value
@@ -37,62 +37,62 @@ extension CGFloat {
 
 func + (left: CGPoint, right: CGPoint) -> CGPoint {
     
-    return CGPointMake(left.x + right.x, left.y + right.y)
+    return CGPoint(x: left.x + right.x, y: left.y + right.y)
 }
 func - (left: CGPoint, right: CGPoint) -> CGPoint {
     
-    return CGPointMake(left.x - right.x, left.y - right.y)
+    return CGPoint(x: left.x - right.x, y: left.y - right.y)
 }
 func * (left: CGPoint, right: CGPoint) -> CGPoint {
     
-    return CGPointMake(left.x * right.x, left.y * right.y)
+    return CGPoint(x: left.x * right.x, y: left.y * right.y)
 }
 func / (left: CGPoint, right: CGPoint) -> CGPoint {
     
-    return CGPointMake(left.x / right.x, left.y / right.y)
+    return CGPoint(x: left.x / right.x, y: left.y / right.y)
 }
 
 func % (left: CGPoint, right: CGPoint) -> CGPoint {
     
-    return CGPointMake(left.x % right.x, left.y % right.y)
+    return CGPoint(x: left.x.truncatingRemainder(dividingBy: right.x), y: left.y.truncatingRemainder(dividingBy: right.y))
 }
 
-func += (inout left: CGPoint, right: CGPoint) {
+func += (left: inout CGPoint, right: CGPoint) {
     left = left + right
 }
-func -= (inout left: CGPoint, right: CGPoint) {
+func -= (left: inout CGPoint, right: CGPoint) {
     left = left - right
 }
-func *= (inout left: CGPoint, right: CGPoint) {
+func *= (left: inout CGPoint, right: CGPoint) {
     left = left * right
 }
-func /= (inout left: CGPoint, right: CGPoint) {
+func /= (left: inout CGPoint, right: CGPoint) {
     left = left / right
 }
 
 
 func * (left: CGPoint, right: CGFloat) -> CGPoint {
     
-    return CGPointMake(left.x * right, left.y * right)
+    return CGPoint(x: left.x * right, y: left.y * right)
 }
 func / (left: CGPoint, right: CGFloat) -> CGPoint {
     
-    return CGPointMake(left.x / right, left.y / right)
+    return CGPoint(x: left.x / right, y: left.y / right)
 }
 func + (left: CGPoint, right: CGFloat) -> CGPoint {
     
-    return CGPointMake(left.x + right, left.y + right)
+    return CGPoint(x: left.x + right, y: left.y + right)
 }
 func - (left: CGPoint, right: CGFloat) -> CGPoint {
     
-    return CGPointMake(left.x - right, left.y - right)
+    return CGPoint(x: left.x - right, y: left.y - right)
 }
 
-func floor(point:CGPoint) -> CGPoint {
-    return CGPointMake(floor(point.x), floor(point.y))
+func floor(_ point:CGPoint) -> CGPoint {
+    return CGPoint(x: floor(point.x), y: floor(point.y))
 }
 
-func round(value: CGPoint, tollerence:CGFloat)-> CGPoint {
+func round(_ value: CGPoint, tollerence:CGFloat)-> CGPoint {
     return CGPoint(x: round(value.x, tollerence: tollerence)
         , y: round(value.y, tollerence: tollerence))
 }
@@ -101,45 +101,45 @@ func round(value: CGPoint, tollerence:CGFloat)-> CGPoint {
 
 func + (left: CGSize, right: CGSize) -> CGSize {
     
-    return CGSizeMake(left.width + right.width, left.height + right.height)
+    return CGSize(width: left.width + right.width, height: left.height + right.height)
 }
 func - (left: CGSize, right: CGSize) -> CGSize {
     
-    return CGSizeMake(left.width - right.width, left.height - right.height)
+    return CGSize(width: left.width - right.width, height: left.height - right.height)
 }
 func * (left: CGSize, right: CGSize) -> CGSize {
     
-    return CGSizeMake(left.width * right.width, left.height * right.height)
+    return CGSize(width: left.width * right.width, height: left.height * right.height)
 }
 func / (left: CGSize, right: CGSize) -> CGSize {
     
-    return CGSizeMake(left.width / right.width, left.height / right.height)
+    return CGSize(width: left.width / right.width, height: left.height / right.height)
 }
 
 func / (left: CGSize, right: CGFloat) -> CGSize {
     
-    return CGSizeMake(left.width / right, left.height / right)
+    return CGSize(width: left.width / right, height: left.height / right)
 }
 
 // CGSize v CGPoint
 
-func sizeToPoint(size: CGSize) -> CGPoint {
-    return CGPointMake(size.width, size.height)
+func sizeToPoint(_ size: CGSize) -> CGPoint {
+    return CGPoint(x: size.width, y: size.height)
 }
 
 func * (left: CGPoint, right: CGSize) -> CGPoint {
     
-    return CGPointMake(left.x * right.width, left.y * right.height)
+    return CGPoint(x: left.x * right.width, y: left.y * right.height)
 }
 func / (left: CGPoint, right: CGSize) -> CGPoint {
     
-    return CGPointMake(left.x / right.width, left.y / right.height)
+    return CGPoint(x: left.x / right.width, y: left.y / right.height)
 }
 func + (left: CGPoint, right: CGSize) -> CGPoint {
     
-    return CGPointMake(left.x + right.width, left.y + right.height)
+    return CGPoint(x: left.x + right.width, y: left.y + right.height)
 }
 func - (left: CGPoint, right: CGSize) -> CGPoint {
     
-    return CGPointMake(left.x - right.width, left.y - right.height)
+    return CGPoint(x: left.x - right.width, y: left.y - right.height)
 }
