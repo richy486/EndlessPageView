@@ -82,7 +82,6 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
             if contentOffset.x.isNaN || contentOffset.y.isNaN {
                 contentOffset = oldValue
             }
-//            print("contentOffset: \(contentOffset)")
             updateBounds()
             updateCells()
         }
@@ -107,7 +106,6 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
     fileprivate var visibleCellsFromLocation = [IndexLocation: EndlessPageCell]()
     
     // Animation
-//    fileprivate var offsetChangeAnimation:UIViewPropertyAnimator?
     fileprivate var offsetChangeAnimation:Interpolate?
     
     fileprivate var hasDoneFirstReload = false
@@ -168,9 +166,6 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
                 if let offsetChangeAnimation = offsetChangeAnimation {
                     runCompletion = false
                     offsetChangeAnimation.stopAnimation()
-//                    offsetChangeAnimation.stopAnimation(true)
-                    //                    runCompletion = true
-                    
                 }
                 
                 delegate?.endlessPageViewWillScroll(self)
@@ -229,8 +224,6 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
                     
                     return point
                 }()
-                
-                //                print("contentOffset: \(contentOffset)")
             }
             
             if panGesture.state == UIGestureRecognizerState.ended {
@@ -238,8 +231,6 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
                 if let offsetChangeAnimation = offsetChangeAnimation {
                     runCompletion = false
                     offsetChangeAnimation.stopAnimation()
-//                    offsetChangeAnimation.stopAnimation(true)
-                    
                 }
                 
                 
@@ -282,9 +273,6 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
                     let animationTime:TimeInterval = 0.2
                     
                     runCompletion = true
-                    //                    print("start animation")
-                    
-                    
                     
                     offsetChangeAnimation = Interpolate(from: contentOffset
                         , to: pagePoint
@@ -294,50 +282,15 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
                             self?.contentOffset = pos
                             self?.updateBounds()
                             self?.updateCells()
-                        })
+                    })
                     offsetChangeAnimation?.animate(1.0, duration: CGFloat(animationTime), completion: { [weak self] in
                         if runCompletion {
-                            //                            print("end animation")
                             if let strongSelf = self {
-//                                strongSelf.contentOffset = pagePoint
                                 strongSelf.directionLockedTo = .Both
                                 strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
                             }
                         }
-                        })
- 
-//                    offsetChangeAnimation = UIViewPropertyAnimator(duration: animationTime
-//                        , controlPoint1: contentOffset
-//                        , controlPoint2: pagePoint
-//                        , animations: { [weak self] (position) in
-//                            
-//                            self?.contentOffset = pagePoint
-//                            self?.updateBounds()
-//                            self?.updateCells()
-//                    })
-//                    
-                    /*
-                    offsetChangeAnimation = UIViewPropertyAnimator(duration: animationTime
-                        , curve: .easeOut
-                        , animations: { [weak self] in
-                            if let strongSelf = self {
-                                strongSelf.contentOffset = pagePoint
-//                                strongSelf.updateBounds()
-//                                strongSelf.updateCells()
-                            }
                     })
-                    
-                    offsetChangeAnimation?.addCompletion { [weak self] (position) in
-                        if runCompletion {
-                            if let strongSelf = self {
-                                strongSelf.contentOffset = pagePoint
-                                strongSelf.directionLockedTo = .Both
-                                strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
-                            }
-                        }
-                    }
-                    offsetChangeAnimation?.startAnimation()
-                    */
                 } else {
                     
                     let velocity = panGesture.velocity(in: holder) * -1
@@ -369,39 +322,17 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
                         , apply: { [weak self] (pos) in
                             
                             self?.contentOffset = pos
-                        })
+                    })
                     offsetChangeAnimation?.animate(1.0, duration: CGFloat(animationTime), completion: { [weak self] in
                         
                         if let strongSelf = self {
                             strongSelf.directionLockedTo = .Both
                             strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
                         }
-                        })
-                    
-                    /*
-                    offsetChangeAnimation = UIViewPropertyAnimator(duration: animationTime
-                        , curve: .easeOut
-                        , animations: { [weak self] in
-                            if let strongSelf = self {
-                                strongSelf.contentOffset = slideToPoint
-//                                strongSelf.updateBounds()
-//                                strongSelf.updateCells()
-                            }
-                        })
-                    
-                    offsetChangeAnimation?.addCompletion { [weak self] (position) in
-                        if let strongSelf = self {
-                            strongSelf.directionLockedTo = .Both
-                            strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
-                        }
-                    }
-                    offsetChangeAnimation?.startAnimation()
-                    */
+                    })
                 }
             }
         }
-        
-        
     }
     
     // MARK: Public getters
@@ -464,12 +395,9 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
         
         let pagePoint = CGPoint(x: indexLocation.column, y: indexLocation.row) * self.bounds.size
         
-        
-        
         if let offsetChangeAnimation = offsetChangeAnimation {
             offsetChangeAnimation.stopAnimation()
             offsetChangeAnimation.invalidate()
-//            offsetChangeAnimation.stopAnimation(true)
         }
         
         if animated {
@@ -488,33 +416,14 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
             , apply: { [weak self] (pos) in
                 
                 self?.contentOffset = pos
-            })
+        })
         offsetChangeAnimation?.animate(1.0, duration: CGFloat(animationTime), completion: { [weak self] in
             
             if let strongSelf = self {
                 strongSelf.contentOffset = pagePoint
                 strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
             }
-            })
-        /*
-        offsetChangeAnimation = UIViewPropertyAnimator(duration: animationTime
-            , curve: .easeOut
-            , animations: { [weak self] in
-                if let strongSelf = self {
-                    strongSelf.contentOffset = pagePoint
-                    //                                strongSelf.updateBounds()
-                    //                                strongSelf.updateCells()
-                }
-            })
-        
-        offsetChangeAnimation?.addCompletion { [weak self] (position) in
-            if let strongSelf = self {
-                strongSelf.contentOffset = pagePoint
-                strongSelf.delegate?.endlessPageViewDidEndDecelerating(strongSelf)
-            }
-        }
-        offsetChangeAnimation?.startAnimation()
-        */
+        })
     }
     
     // MARK: Data cache
@@ -595,9 +504,6 @@ open class EndlessPageView : UIView, UIGestureRecognizerDelegate, _EndlessPageCe
             , tollerence: 0.0001)
         
         if !pageOffset.x.isNaN && !pageOffset.y.isNaN {
-            
-            
-//            print("presentation bounds: \(self.layer.presentation()?.bounds)")
             
             let rows:[Int] = {
                 if pageOffset.y >= 0 {
