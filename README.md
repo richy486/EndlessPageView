@@ -16,5 +16,4 @@ It works in paginated or non-paginated mode.
 
 #### Dependencies
 
-[Fork of Interpolate](https://github.com/richy486/Interpolate) based on:
 [Interpolate](https://github.com/marmelroy/Interpolate) - by [marmelroy](http://marmelroy.github.io/)
